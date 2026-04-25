@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Français - карточки для погружения</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a1f 0%, #0e1a0c 100%);
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+
+        /* главное приложение */
+        .app {
+            width: 100%;
+            max-width: 550px;
+            background: #fef7e0;
+            border-radius: 48px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 85vh;
+            max-height: 800px;
+        }
+
+        /* шапка с вкладками */
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            overflow-y: hidden;
+            background: #2d4a1e;
+            padding: 8px 12px;
+            gap: 8px;
+            scrollbar-width: thin;
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            background: #4a6e3c;
+            border: none;
+            color: #fef7e0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .tab-btn.active {
+            background: #f5c542;
+            color: #1a2a1f;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        /* контейнер для карточек */
+        .cards-container {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: #e8e0c0;
+            margin: 16px;
+            border-radius: 40px;
+            box-shadow: inset 0 0 0 2px #fff8e7, 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        /* стек карточек */
+        .card-stack {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            position: absolute;
+            width: 90%;
+            max-width: 320px;
+            background: #ffffff;
+            border-radius: 40px;
+            padding: 24px 20px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            will-change: transform;
+            background: #fffef5;
+        }
+
+        .card:active {
+            cursor: grabbing;
+        }
+
+        .card-image {
+            width: 100%;
+            background: #dce8cd;
+            border-radius: 32px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .card-image img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 24px;
+            background: #f0f7e6;
+        }
+
+        .french-word {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #2d4a1e;
+            margin: 8px 0 8px;
+            letter-spacing: 1px;
+        }
+
+        .transcription {
+            font-size: 1.3rem;
+            font-family: monospace;
+            background: #f0ebd0;
+            padding: 6px 16px;
+            border-radius: 40px;
+            color: #6b4c2c;
+            margin-bottom: 12px;
+        }
+
+        /* кнопки действий */
+        .action-buttons {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            background: #4a6e3c;
+            border: none;
+            font-size: 2rem;
+            padding: 10px 20px;
+            border-radius: 60px;
+            cursor: pointer;
+            color: white;
+            transition: 0.1s;
+            box-shadow: 0 4px 0 #2a3e1f;
+        }
+
+        .action-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #2a3e1f;
+        }
+
+        .action-btn.left {
+            background: #b87333;
+        }
+        .action-btn.right {
+            background: #3c8c40;
+        }
+
+        /* счётчик и статус */
+        .status {
+            padding: 12px 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #4a6e3c;
+            font-weight: 500;
+            background: #fef7e0;
+            border-top: 1px solid #e2d7b2;
+            flex-shrink: 0;
+        }
+
+        .empty-message {
+            text-align: center;
+            color: #8a7a5a;
+            padding: 40px;
+        }
+
+        @media (max-width: 550px) {
+            .french-word {
+                font-size: 2.2rem;
+            }
+            .transcription {
+                font-size: 1rem;
+            }
+            .card-image img {
+                height: 150px;
+            }
+            .action-btn {
+                font-size: 1.5rem;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <div class="tabs" id="tabs"></div>
+    <div class="cards-container" id="cardsContainer">
+        <div class="card-stack" id="cardStack"></div>
+    </div>
+    <div class="status" id="status">загружаем...</div>
+</div>
+
+<script>
+    // ==================== БАЗА СЛОВ ПО ТЕМАМ ====================
+    // каждая тема: название + массив слов {word, img, transcription}
+    const topics = {
+        verbes: {
+            name: "🚀 Глаголы",
+            words: [
+                { word: "être", img: "https://cdn.pixabay.com/photo/2016/11/19/14/16/man-1839500_1280.jpg", transcription: "[ɛtʁ]" },
+                { word: "avoir", img: "https://cdn.pixabay.com/photo/2017/08/06/11/55/hands-2591548_1280.jpg", transcription: "[avwaʁ]" },
+                { word: "aller", img: "https://cdn.pixabay.com/photo/2015/01/20/12/51/mobile-605422_1280.jpg", transcription: "[ale]" },
+                { word: "faire", img: "https://cdn.pixabay.com/photo/2016/11/29/03/53/work-1867421_1280.jpg", transcription: "[fɛʁ]" },
+                { word: "pouvoir", img: "https://cdn.pixabay.com/photo/2017/06/06/22/46/medal-2379238_1280.jpg", transcription: "[puvwaʁ]" },
+                { word: "vouloir", img: "https://cdn.pixabay.com/photo/2016/01/19/17/46/hands-1149379_1280.jpg", transcription: "[vulwaʁ]" },
+                { word: "parler", img: "https://cdn.pixabay.com/photo/2018/03/17/18/09/talking-3235176_1280.jpg", transcription: "[paʁle]" },
+                { word: "manger", img: "https://cdn.pixabay.com/photo/2015/09/02/12/06/eating-918584_1280.jpg", transcription: "[mɑ̃ʒe]" },
+                { word: "boire", img: "https://cdn.pixabay.com/photo/2016/11/29/09/32/drinks-1868732_1280.jpg", transcription: "[bwaʁ]" },
+                { word: "aimer", img: "https://cdn.pixabay.com/photo/2018/05/06/11/20/heart-3378063_1280.jpg", transcription: "[eme]" },
+                { word: "habiter", img: "https://cdn.pixabay.com/photo/2016/11/18/17/46/house-1836070_1280.jpg", transcription: "[abite]" },
+                { word: "travailler", img: "https://cdn.pixabay.com/photo/2015/09/05/20/02/laptop-924935_1280.jpg", transcription: "[tʁavaje]" },
+                { word: "regarder", img: "https://cdn.pixabay.com/photo/2016/11/23/00/27/eyes-1851484_1280.jpg", transcription: "[ʁəɡaʁde]" },
+                { word: "s'appeler", img: "https://cdn.pixabay.com/photo/2016/11/22/19/08/name-tag-1850170_1280.jpg", transcription: "[saple]" }
+            ]
+        },
+        pronoms: {
+            name: "👤 Местоимения",
+            words: [
+                { word: "je", img: "https://cdn.pixabay.com/photo/2016/03/31/20/31/avatar-1295397_1280.png", transcription: "[ʒə]" },
+                { word: "tu", img: "https://cdn.pixabay.com/photo/2016/03/31/20/31/avatar-1295398_1280.png", transcription: "[ty]" },
+                { word: "il", img: "https://cdn.pixabay.com/photo/2016/04/01/10/06/boy-1299403_1280.png", transcription: "[il]" },
+                { word: "elle", img: "https://cdn.pixabay.com/photo/2016/04/01/10/06/girl-1299405_1280.png", transcription: "[ɛl]" },
+                { word: "nous", img: "https://cdn.pixabay.com/photo/2017/08/07/16/13/group-2604971_1280.png", transcription: "[nu]" },
+                { word: "vous", img: "https://cdn.pixabay.com/photo/2019/10/06/18/44/business-4529908_1280.png", transcription: "[vu]" },
+                { word: "ils", img: "https://cdn.pixabay.com/photo/2016/11/29/05/44/group-1867663_1280.jpg", transcription: "[il]" },
+                { word: "elles", img: "https://cdn.pixabay.com/photo/2016/12/10/20/13/women-1898108_1280.jpg", transcription: "[ɛl]" },
+                { word: "qui ?", img: "https://cdn.pixabay.com/photo/2016/09/01/08/24/question-1635771_1280.png", transcription: "[ki]" },
+                { word: "quoi ?", img: "https://cdn.pixabay.com/photo/2017/08/06/01/24/question-2588697_1280.png", transcription: "[kwa]" },
+                { word: "où ?", img: "https://cdn.pixabay.com/photo/2016/02/19/11/06/map-1209503_1280.png", transcription: "[u]" },
+                { word: "quand ?", img: "https://cdn.pixabay.com/photo/2016/11/29/01/58/hourglass-1866479_1280.jpg", transcription: "[kɑ̃]" },
+                { word: "comment ?", img: "https://cdn.pixabay.com/photo/2016/09/09/21/10/chat-1655190_1280.png", transcription: "[kɔmɑ̃]" },
+                { word: "pourquoi ?", img: "https://cdn.pixabay.com/photo/2017/08/06/01/36/why-2588629_1280.png", transcription: "[puʁkwa]" }
+            ]
+        },
+        famille: {
+            name: "👨‍👩‍👧‍👦 Семья",
+            words: [
+                { word: "un père", img: "https://cdn.pixabay.com/photo/2016/11/18/19/21/dad-1836814_1280.jpg", transcription: "[œ̃ pɛʁ]" },
+                { word: "une mère", img: "https://cdn.pixabay.com/photo/2015/12/28/14/53/mother-1111333_1280.jpg", transcription: "[yn mɛʁ]" },
+                { word: "un frère", img: "https://cdn.pixabay.com/photo/2016/11/21/16/21/boy-1846623_1280.jpg", transcription: "[œ̃ fʁɛʁ]" },
+                { word: "une sœur", img: "https://cdn.pixabay.com/photo/2016/11/21/16/09/girl-1846564_1280.jpg", transcription: "[yn sœʁ]" },
+                { word: "un ami", img: "https://cdn.pixabay.com/photo/2017/08/01/08/35/friends-2562538_1280.jpg", transcription: "[œ̃n‿ami]" },
+                { word: "des enfants", img: "https://cdn.pixabay.com/photo/2015/07/29/14/39/children-865614_1280.jpg", transcription: "[de zɑ̃fɑ̃]" }
+            ]
+        }
+    };
+
+    // состояние для текущей темы
+    let currentTopic = "verbes";
+    let currentCards = [];      // массив оставшихся карточек
+    let learnedCards = [];      // выученные (отложены)
+    let currentX = 0, currentY = 0, isDragging = false, startX = 0, startY = 0;
+    let activeCardElement = null;
+    let animationId = null;
+
+    const tabsContainer = document.getElementById("tabs");
+    const cardStack = document.getElementById("cardStack");
+    const statusDiv = document.getElementById("status");
+
+    // отрисовка вкладок
+    function renderTabs() {
+        tabsContainer.innerHTML = "";
+        for (const [key, topic] of Object.entries(topics)) {
+            const btn = document.createElement("button");
+            btn.className = "tab-btn" + (key === currentTopic ? " active" : "");
+            btn.textContent = topic.name;
+            btn.onclick = () => switchTopic(key);
+            tabsContainer.appendChild(btn);
+        }
+    }
+
+    // переключение темы
+    function switchTopic(topicKey) {
+        currentTopic = topicKey;
+        currentCards = [...topics[topicKey].words];
+        learnedCards = [];
+        renderTabs();
+        renderCards();
+        updateStatus();
+    }
+
+    // обновить счётчик
+    function updateStatus() {
+        const total = topics[currentTopic].words.length;
+        const left = currentCards.length;
+        const learned = learnedCards.length;
+        statusDiv.innerHTML = `📚 ${left} осталось | ✅ ${learned} выучено | всего ${total}`;
+    }
+
+    // отрисовка стека карточек
+    function renderCards() {
+        cardStack.innerHTML = "";
+        if (currentCards.length === 0 && learnedCards.length === 0) {
+            cardStack.innerHTML = `<div class="empty-message">✨ Поздравляю! Все слова выучены! ✨<br>👆 выбери другую тему</div>`;
+            updateStatus();
+            return;
+        }
+        if (currentCards.length === 0 && learnedCards.length > 0) {
+            cardStack.innerHTML = `<div class="empty-message">🎉 Ты выучил(а) все слова этой темы! 🎉<br>🔄 переключи тему для новых слов</div>`;
+            updateStatus();
+            return;
+        }
+
+        // показываем только первую карточку из currentCards
+        const word = currentCards[0];
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <div class="card-image">
+                <img src="${word.img}" alt=" " loading="lazy">
+            </div>
+            <div class="french-word">${word.word}</div>
+            <div class="transcription">${word.transcription}</div>
+            <div class="action-buttons">
+                <button class="action-btn left" id="forgetBtn">❌</button>
+                <button class="action-btn right" id="rememberBtn">✅</button>
+            </div>
+        `;
+        cardStack.appendChild(card);
+        attachDragEvents(card);
+        
+        // кнопки
+        const forgetBtn = card.querySelector("#forgetBtn");
+        const rememberBtn = card.querySelector("#rememberBtn");
+        forgetBtn.onclick = (e) => { e.stopPropagation(); swipeLeft(card); };
+        rememberBtn.onclick = (e) => { e.stopPropagation(); swipeRight(card); };
+    }
+
+    // обработать свайп влево (не запомнил -> в конец очереди)
+    function swipeLeft(cardElement) {
+        if (currentCards.length === 0) return;
+        const word = currentCards.shift();
+        currentCards.push(word); // отправляем в конец для повтора
+        renderCards();
+        updateStatus();
+    }
+
+    // свайп вправо (запомнил -> отложить в выученные)
+    function swipeRight(cardElement) {
+        if (currentCards.length === 0) return;
+        const word = currentCards.shift();
+        learnedCards.push(word);
+        renderCards();
+        updateStatus();
+    }
+
+    // === drag & drop для свайпа мышкой / пальцем ===
+    function attachDragEvents(card) {
+        card.addEventListener("mousedown", onDragStart);
+        card.addEventListener("touchstart", onDragStart, { passive: false });
+        window.addEventListener("mousemove", onDragMove);
+        window.addEventListener("mouseup", onDragEnd);
+        window.addEventListener("touchmove", onDragMove, { passive: false });
+        window.addEventListener("touchend", onDragEnd);
+        
+        function onDragStart(e) {
+            if (activeCardElement) return;
+            e.preventDefault();
+            isDragging = true;
+            activeCardElement = card;
+            const clientX = e.clientX ?? e.touches[0].clientX;
+            const clientY = e.clientY ?? e.touches[0].clientY;
+            startX = clientX;
+            startY = clientY;
+            currentX = 0;
+            currentY = 0;
+            card.style.transition = "none";
+        }
+
+        function onDragMove(e) {
+            if (!isDragging || !activeCardElement) return;
+            e.preventDefault();
+            const clientX = e.clientX ?? e.touches[0].clientX;
+            const clientY = e.clientY ?? e.touches[0].clientY;
+            let deltaX = clientX - startX;
+            let deltaY = clientY - startY;
+            currentX = deltaX;
+            currentY = deltaY;
+            const rotation = deltaX * 0.02;
+            activeCardElement.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${rotation}deg)`;
+        }
+
+        function onDragEnd(e) {
+            if (!isDragging || !activeCardElement) return;
+            isDragging = false;
+            const threshold = 120;
+            if (Math.abs(currentX) > threshold) {
+                if (currentX > 0) {
+                    swipeRight(activeCardElement);
+                } else {
+                    swipeLeft(activeCardElement);
+                }
+            }
+            if (activeCardElement) {
+                activeCardElement.style.transition = "transform 0.2s";
+                activeCardElement.style.transform = "";
+            }
+            activeCardElement = null;
+            currentX = 0;
+            currentY = 0;
+        }
+    }
+
+    // управление с клавиатуры (стрелки на компе)
+    window.addEventListener("keydown", (e) => {
+        const cardDiv = document.querySelector(".card");
+        if (!cardDiv) return;
+        if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            swipeLeft(cardDiv);
+        } else if (e.key === "ArrowRight") {
+            e.preventDefault();
+            swipeRight(cardDiv);
+        }
+    });
+
+    // инициализация
+    function init() {
+        renderTabs();
+        switchTopic("verbes");
+    }
+
+    init();
+</script>
+</body>
+</html>
